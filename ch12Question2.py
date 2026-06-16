@@ -1,5 +1,5 @@
-user = int(input("Number pls: "))
-
-
-tables = [user*item for item in range(1,11)]
-print(tables)
+list1=["harry","garry","parry",
+       "terrry","sarry","marry","narry","charry",]
+for i, item in enumerate(list1):
+ if(i==3 or i== 5 or i==7):
+    print(i, item)
