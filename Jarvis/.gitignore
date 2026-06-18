@@ -1,0 +1,18 @@
+# Virtual Environment
+.jarvis/
+Include/
+Lib/
+Scripts/
+
+# Environment Variables
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# OS Files
+.DS_Store

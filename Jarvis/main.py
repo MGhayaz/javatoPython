@@ -2,7 +2,9 @@ import speech_recognition as sr
 import webbrowser
 import pyttsx3
 import musiclib
+import requests
 
+newskey =  
 
 def speak(text):
     print("speaking... "+ text)
@@ -33,11 +35,24 @@ def processcommand(command):
         webbrowser.open("https://leetcode.com")
 
     elif "claude" in command:
-        webbrowser.open("https://claude.ai")    
+        webbrowser.open("https://claude.ai")
+
+        #LOCAL MUSIC DICT SE GANE CHALARA BY MATCHING KEY LIKE SKYFALL   
     elif command.startswith("play"):
         song = command.splits(" ")[1]       
         link = musiclib.music(song)
         webbrowser.open(link)
+
+        # news lane ka code block through api called NewsAPI
+    elif "news" in command.lower():
+        r = requests.get(f"https://newsapi.org/v2/top-headlines?country=in&apiKey={newskey}")
+        if(r.status_code ==200):
+            data = r.json()   
+            articles = data.get('article',[]) 
+            for article in articles :
+                speak(article("title"))   
+        else :
+            print("failed to retrieve")        
 
 if __name__ == "__main__":
     speak("INITIALIZING IRSHARD BHAI.....")
@@ -47,7 +62,7 @@ if __name__ == "__main__":
         try :
             with sr.Microphone() as mic:
                 print("Listening")
-                audio = recognizer.listen(mic,timeout=4,phrase_time_limit=1)
+                audio = recognizer.listen(mic,timeout=2,phrase_time_limit=1)
             word = recognizer.recognize_google(audio)
             print(word)
             if word.lower() == "jarvis":
