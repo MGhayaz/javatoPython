@@ -1,20 +1,31 @@
 import speech_recognition as sr
 import webbrowser
-import pyttsx3
-import musiclib
 import requests
+import pyttsx3
+# local music library
+import musiclib
+# importing function from gemini service script to render and collect ai related interaction
+from gemini_service import ask_ai
 
-newskey =  
+# api key leke aaye from config jo env se key utayi. param use kare for clear formating
+from config import NEWS_API_KEY
+if not NEWS_API_KEY:
+    raise ValueError("NEWS_API_KEY not found")
+url = "https://newsapi.org/v2/top-headlines"
+params = {
+    "country": "in",
+    "apiKey": NEWS_API_KEY
+}
 
 def speak(text):
-    print("speaking... "+ text)
     engine = pyttsx3.init()
+    print("speaking..."+ text)
     engine.say(text)
     engine.runAndWait() 
     engine.stop()
 
 def processcommand(command):
-    command = command.lower().strip()
+    command = command.lower()
 
     if "youtube" in command:
         webbrowser.open("https://www.youtube.com")
@@ -39,34 +50,41 @@ def processcommand(command):
 
         #LOCAL MUSIC DICT SE GANE CHALARA BY MATCHING KEY LIKE SKYFALL   
     elif command.startswith("play"):
-        song = command.splits(" ")[1]       
-        link = musiclib.music(song)
-        webbrowser.open(link)
+        song = command.replace("play","",1).strip()       
+        link = musiclib.music.get(song)
+        if link:
+            webbrowser.open(link)
+        else:
+            speak("Song not found")
 
         # news lane ka code block through api called NewsAPI
-    elif "news" in command.lower():
-        r = requests.get(f"https://newsapi.org/v2/top-headlines?country=in&apiKey={newskey}")
+    elif "latest" in command.lower():
+        r = requests.get(url, params=params)
         if(r.status_code ==200):
             data = r.json()   
-            articles = data.get('article',[]) 
+            articles = data.get('articles',[]) 
             for article in articles :
-                speak(article("title"))   
+                speak(article["title"])   
         else :
-            print("failed to retrieve")        
+            print("failed to retrieve") 
+    elif command != "": 
+        answer = ask_ai(command)
+        speak(answer)
+                       
 
 if __name__ == "__main__":
     speak("INITIALIZING IRSHARD BHAI.....")
-    while True:
-        recognizer = sr.Recognizer() 
+    recognizer = sr.Recognizer() 
+    while True:  
         print("Recognizing")    
         try :
             with sr.Microphone() as mic:
                 print("Listening")
-                audio = recognizer.listen(mic,timeout=2,phrase_time_limit=1)
+                audio = recognizer.listen(mic,timeout=3,phrase_time_limit=2)
             word = recognizer.recognize_google(audio)
             print(word)
             if word.lower() == "jarvis":
-                speak("meet the sweet sound")
+                speak("Yeayy")
                 with sr.Microphone() as mic:
                     print("Jarvis is active")
                     audio = recognizer.listen(mic)
@@ -76,5 +94,5 @@ if __name__ == "__main__":
         except sr.UnknownValueError :
             print("Unknown value error")
         except Exception as e :
-            print("Google recorgnizer error or other" + e)           
+            print("Google recorgnizer error or other" , e)           
 
